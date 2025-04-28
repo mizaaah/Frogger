@@ -6,14 +6,14 @@
 
 # 📑 Table des matières
 
-- [📖 Introduction](#1--introduction)
-- [🎯 Objectifs](#2--objectifs)
-- [✨ Fonctionnalités principales](#3--fonctionnalités-principales)
-- [🛠️ Architecture technique](#4-️-architecture-technique)
-- [🎨 Interface utilisateur](#5--interface-utilisateur)
-- [⚡ Performances](#6--performances)
-- [💻 Langages utilisés](#7--langages-utilisés)
-- [⚠️ Mise en garde](#8-️-mise-en-garde)
+1. [📖 Introduction](#1--introduction)
+2. [🎯 Objectifs](#2--objectifs)
+3. [✨ Fonctionnalités principales](#3--fonctionnalités-principales)
+4. [🛠️ Architecture technique](#4-️-architecture-technique)
+5. [🎨 Interface utilisateur](#5--interface-utilisateur)
+6. [⚡ Performances](#6--performances)
+7. [💻 Langages utilisés](#7--langages-utilisés)
+8. [⚠️ Mise en garde](#8-️-mise-en-garde)
 
 ---
 
