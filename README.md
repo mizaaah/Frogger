@@ -105,3 +105,61 @@ Optimisations :
 Ce projet est actuellement en phase de développement.  
 Des fonctionnalités supplémentaires (menu principal, game over amélioré, musiques, skins personnalisés) peuvent être ajoutées dans les futures versions.  
 Merci pour votre compréhension et votre soutien ! 🚀
+
+---
+
+# Répartition des tâches du projet
+
+Voici la répartition des tâches entre les membres du groupe. Chaque développeur a des responsabilités spécifiques dans le projet.
+
+## 🔴 **Développeur 1 : Gestion des éléments du jeu (logique de base)**
+
+- **Responsabilités** :
+  - Gestion du mouvement du joueur
+  - Logique des obstacles (voitures, trains, buches)
+  - Réinitialisation du jeu
+  - Détection des collisions
+- **Fichiers associés** :
+  - `game.py`
+
+---
+
+## 🟢 **Développeur 2 : Affichage et visuel**
+
+- **Responsabilités** :
+  - Création de la fenêtre de jeu
+  - Affichage des éléments du jeu (joueur, obstacles, score, arrière-plan)
+  - Animation et mouvement des objets
+- **Fichiers associés** :
+  - `game.py`
+
+---
+
+## 🔵 **Développeur 3 : Gestion des paramètres et des constantes**
+
+- **Responsabilités** :
+  - Définition des constantes (taille de la fenêtre, couleurs, tailles des tuiles, etc.)
+  - Réglages du jeu (vitesse des voitures, du joueur, règles du jeu, etc.)
+  - Révision des valeurs et ajustements
+- **Fichiers associés** :
+  - `config.py`
+
+---
+
+## 🟡 **Développeur 4 : Gestion de la logique principale et boucle de jeu**
+
+- **Responsabilités** :
+  - Gestion de la boucle principale du jeu
+  - Contrôles du joueur (mouvements via les touches directionnelles)
+  - Gestion du score et de la progression
+- **Fichiers associés** :
+  - `main.py`
+
+---
+
+## 📊 **Outils de collaboration et gestion de projet**
+
+- **Git & GitHub** : Utilisation de branches pour éviter les conflits. Chaque développeur travaille sur une fonctionnalité dans une branche, puis fusionne avec la branche principale.
+- **Communication** : Réunions régulières pour discuter des avancements, résoudre les problèmes et tester les fonctionnalités.
+- **Suivi des tâches** : Utilisation de Trello/Notion pour organiser et suivre l'avancement des tâches.
+
