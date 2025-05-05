@@ -14,11 +14,11 @@ GREEN = (0, 200, 0)
 RED = (200, 0, 0)
 BLACK = (0, 0, 0)
 
-#joueur(quand la touche reste enfoncée, il se déplace à l'infini mais on veut pas ça)
+#joueur
 player_size = 50
 player_x = WIDTH // 2
 player_y = HEIGHT - player_size
-player_speed = 15  #15 ou 20 c'est bien
+player_speed = 15  #15 ou 20 à voir
 
 #liste voitures
 cars = []
@@ -28,6 +28,7 @@ scroll_y = 0
 car_spawn_timer = 0
 score = 0
 font = pygame.font.SysFont("Arial", 30)
+big_font = pygame.font.SysFont("Arial", 60)
 
 clock = pygame.time.Clock()
 
@@ -42,6 +43,28 @@ def spawn_car(y_pos):
         'speed': random.choice([-5, -4, -3, 3, 4, 5])
     }
     cars.append(car)
+
+#fonction pour afficher le menu de démarrage (provisoire)
+def show_start_menu():
+    waiting = True
+    while waiting:
+        win.fill(WHITE)
+        title_text = big_font.render("Frogger", True, BLACK)
+        instruction_text = font.render("Appuyez sur ESPACE pour jouer", True, BLACK)
+        win.blit(title_text, (WIDTH//2 - title_text.get_width()//2, HEIGHT//3))
+        win.blit(instruction_text, (WIDTH//2 - instruction_text.get_width()//2, HEIGHT//2))
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    waiting = False
+
+#afficher le menu avant de commencer
+show_start_menu()
 
 #boucle principale
 run = True
@@ -81,7 +104,7 @@ while run:
         spawn_car(random.randint(-100, 0))
         car_spawn_timer = 0
 
-    # Mise à jour des voitures
+    #mise à jour des voitures
     for car in cars:
         car['x'] += car['speed']
     
