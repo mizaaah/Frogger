@@ -1,18 +1,31 @@
 import pygame
-from game import Game  # Import de la classe qui sera def dans game.py
+from game import Frog  # Import de la classe qui sera def dans game.py
 
 
 def main():
     # Initialisation de pygame
     pygame.init()
 
+    #Une création de fentêtre du jeu à faire
+
 
     # Initialisation du jeu
-    game = Game()
+    game = Frog()
     score = 0  # Initialisation du score
 
 
     #Boucle principal du jeu sera ici : 
+    running = True
+    while running:
+        #boucle
+
+
+
+
+        #Récup touches enfoncées
+        keys = pygame.key.get_pressed()
+        game.deplacer(keys)  # Déplacer la grenouille selon les touches appuyées
+
     
         # Mise à jour du jeu
         game.update()
