@@ -21,7 +21,7 @@ fixed_frog_y = HEIGHT // 2  # Position fixe à partir du milieu
 # Fond (deux copies pour défilement continu)
 bg_y1 = 0
 bg_y2 = -HEIGHT
-scroll_offset = 0  # Décalage vertical total (sert aussi pour score par ex.)
+scroll_offset = 0  # Décalage vertical total et le score
 
 running = True
 while running:
