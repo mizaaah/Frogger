@@ -30,7 +30,6 @@ car_left_img1 = pygame.image.load("Frogger/IMAGES/VoitureGDgauche.png").convert_
 car_right_img1 = pygame.image.load("Frogger/IMAGES/VoitureGDdroite.png").convert_alpha()
 car_left_img2 = pygame.image.load("Frogger/IMAGES/VoitureRDgauche.png").convert_alpha()
 car_right_img2 = pygame.image.load("Frogger/IMAGES/VoitureRDdroite.png").convert_alpha()
-
 truck_left_img1 = pygame.image.load("Frogger/IMAGES/CamionGGauche.png").convert_alpha()
 truck_right_img1 = pygame.image.load("Frogger/IMAGES/CamionGDdroite.png").convert_alpha()
 truck_left_img2 = pygame.image.load("Frogger/IMAGES/CamionRDgauche.png").convert_alpha()
@@ -39,12 +38,10 @@ truck_right_img2 = pygame.image.load("Frogger/IMAGES/CamionRDdroite.png").conver
 # Redimensionner les véhicules
 car_img_size = (120, 60)
 truck_img_size = (180, 80)
-
 car_left_img1 = pygame.transform.scale(car_left_img1, car_img_size)
 car_right_img1 = pygame.transform.scale(car_right_img1, car_img_size)
 car_left_img2 = pygame.transform.scale(car_left_img2, car_img_size)
 car_right_img2 = pygame.transform.scale(car_right_img2, car_img_size)
-
 truck_left_img1 = pygame.transform.scale(truck_left_img1, truck_img_size)
 truck_right_img1 = pygame.transform.scale(truck_right_img1, truck_img_size)
 truck_left_img2 = pygame.transform.scale(truck_left_img2, truck_img_size)
@@ -69,7 +66,7 @@ RED = (200, 0, 0)
 WHITE = (255, 255, 255)
 
 # Constantes joueur
-frog_speed = 2.5
+frog_speed = 3              #Vitesse perso
 fixed_frog_y = HEIGHT // 2
 
 # Voies de circulation
@@ -77,6 +74,23 @@ lanes_y = [510, 420, 260, 100]
 
 cars = []
 point_items = []
+
+# Gestion du meilleur score
+best_score = 0
+
+# Fonction pour dessiner un bouton et détecter le clic
+def draw_button(surface, text, x, y, w, h, color, hover_color, font):
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+    if x < mouse[0] < x + w and y < mouse[1] < y + h:
+        pygame.draw.rect(surface, hover_color, (x, y, w, h))
+        if click[0]:
+            return True
+    else:
+        pygame.draw.rect(surface, color, (x, y, w, h))
+    text_surf = font.render(text, True, (0, 0, 0))
+    surface.blit(text_surf, (x + (w - text_surf.get_width()) // 2, y + (h - text_surf.get_height()) // 2))
+    return False
 
 # Objet de type "pièce"
 class PointItem:
@@ -132,13 +146,8 @@ def create_car():
     rect = image.get_rect(topleft=(x, lane))
     return {"rect": rect, "speed": speed, "image": image}
 
-def show_game_over(score):
-    font = pygame.font.SysFont(None, 60)
-    text = font.render(f"Game Over! Score : {score}", True, WHITE)
-    screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2))
-
 def reset_game():
-    global frog_rect, scroll_offset, bg_y1, bg_y2, cars, point_items, score
+    global frog_rect, scroll_offset, bg_y1, bg_y2, cars, point_items, score, game_over, game_over_timer
     frog_rect = frog_img.get_rect()
     frog_rect.centerx = WIDTH // 2
     frog_rect.bottom = HEIGHT - 10
@@ -149,6 +158,8 @@ def reset_game():
     cars = [create_car() for _ in range(5)]
     point_items = [PointItem() for _ in range(5)]
     score = 0
+    game_over = False
+    game_over_timer = 0
 
 def draw_score():
     font = pygame.font.SysFont(None, 30)
@@ -156,10 +167,12 @@ def draw_score():
     screen.blit(score_text, (10, 10))
 
 reset_game()
-game_over = False
-game_over_timer = 0
 
-# Boucle principale
+# Boucle principale avec gestion des états
+state = "menu"  # "menu", "jeu", "game_over"
+font_big = pygame.font.SysFont(None, 60)
+font_small = pygame.font.SysFont(None, 36)
+
 running = True
 while running:
     dt = clock.tick(60)
@@ -170,71 +183,103 @@ while running:
             pygame.quit()
             sys.exit()
 
-    keys = pygame.key.get_pressed()
-
-    if not game_over:
-        if keys[pygame.K_LEFT] and frog_rect.left > 0:
-            frog_rect.x -= frog_speed
-        if keys[pygame.K_RIGHT] and frog_rect.right < WIDTH:
-            frog_rect.x += frog_speed
-        if keys[pygame.K_UP]:
-            if frog_rect.top > fixed_frog_y:
-                frog_rect.y -= frog_speed
-            else:
-                scroll_offset += frog_speed
-                bg_y1 += frog_speed
-                bg_y2 += frog_speed
-                for car in cars:
-                    car["rect"].y += frog_speed
-                for item in point_items:
-                    item.y += frog_speed
-        if keys[pygame.K_DOWN] and frog_rect.bottom < HEIGHT:
-            frog_rect.y += frog_speed
-
-        if bg_y1 >= HEIGHT:
-            bg_y1 = bg_y2 - HEIGHT
-        if bg_y2 >= HEIGHT:
-            bg_y2 = bg_y1 - HEIGHT
-
-        for car in cars:
-            car["rect"].x += car["speed"]
-
-        cars = [car for car in cars if -car["rect"].width < car["rect"].x < WIDTH + car["rect"].width]
-        while len(cars) < 6:
-            cars.append(create_car())
-
-        for item in point_items:
-            item.update()
-            if item.get_rect().colliderect(frog_rect):
-                score += 1
-                item.respawn()
-                piece_sound.play()  # Son de collecte de pièce
-
-        for car in cars:
-            if frog_rect.colliderect(car["rect"]):
-                game_over = True
-                game_over_timer = pygame.time.get_ticks()
-                collision_sound.play()  # Son de collision
-
-    screen.blit(background, (0, bg_y1))
-    screen.blit(background, (0, bg_y2))
-    screen.blit(frog_img, frog_rect)
-
-    for car in cars:
-        screen.blit(car["image"], car["rect"])
-        pygame.draw.rect(screen, (255, 0, 0), car["rect"], 2)  # hitbox rouge pour les voitures
-
-    for item in point_items:
-        item.draw(screen)
-
-    pygame.draw.rect(screen, (0, 255, 0), frog_rect, 2)  # hitbox verte pour la grenouille
-
-    draw_score()
-
-    if game_over:
-        show_game_over(score)
-        if pygame.time.get_ticks() - game_over_timer > 2000:
+    if state == "menu":
+        screen.blit(background, (0, 0))
+        title = font_big.render("FROGGER", True, (255, 255, 255))
+        screen.blit(title, (WIDTH // 2 - title.get_width() // 2, 100))
+        best = font_small.render(f"Meilleur score : {best_score}", True, (255, 255, 0))
+        screen.blit(best, (WIDTH // 2 - best.get_width() // 2, 200))
+        jouer_y = 350
+        if draw_button(screen, "Jouer", WIDTH // 2 - 100, 350, 200, 60, (0, 200, 0), (0, 255, 0), font_small):
             reset_game()
-            game_over = False
+            state = "jeu"
+            pygame.time.wait(200)  # anti double-clic
+        # Bouton Quitter juste en dessous
+        quitter_y = jouer_y + 80
+        if draw_button(screen, "Quitter", WIDTH // 2 - 100, quitter_y, 200, 60, (200, 0, 0), (255, 0, 0), font_small):
+            pygame.quit()
+            sys.exit()
+
+    elif state == "jeu":
+        keys = pygame.key.get_pressed()
+        if not game_over:
+            if keys[pygame.K_LEFT] and frog_rect.left > 0:
+                frog_rect.x -= frog_speed
+            if keys[pygame.K_RIGHT] and frog_rect.right < WIDTH:
+                frog_rect.x += frog_speed
+            if keys[pygame.K_UP]:
+                if frog_rect.top > fixed_frog_y:
+                    frog_rect.y -= frog_speed
+                else:
+                    scroll_offset += frog_speed
+                    bg_y1 += frog_speed
+                    bg_y2 += frog_speed
+                    for car in cars:
+                        car["rect"].y += frog_speed
+                    for item in point_items:
+                        item.y += frog_speed
+            if keys[pygame.K_DOWN] and frog_rect.bottom < HEIGHT:
+                frog_rect.y += frog_speed
+
+            if bg_y1 >= HEIGHT:
+                bg_y1 = bg_y2 - HEIGHT
+            if bg_y2 >= HEIGHT:
+                bg_y2 = bg_y1 - HEIGHT
+
+            for car in cars:
+                car["rect"].x += car["speed"]
+
+            cars = [car for car in cars if -car["rect"].width < car["rect"].x < WIDTH + car["rect"].width]
+            while len(cars) < 6:
+                cars.append(create_car())
+
+            for item in point_items:
+                item.update()
+                if item.get_rect().colliderect(frog_rect):
+                    score += 1
+                    item.respawn()
+                    piece_sound.play()
+
+            for car in cars:
+                if frog_rect.colliderect(car["rect"]):
+                    game_over = True
+                    game_over_timer = pygame.time.get_ticks()
+                    collision_sound.play()
+
+        screen.blit(background, (0, bg_y1))
+        screen.blit(background, (0, bg_y2))
+        screen.blit(frog_img, frog_rect)
+        for car in cars:
+            screen.blit(car["image"], car["rect"])
+            pygame.draw.rect(screen, (255, 0, 0), car["rect"], 2)
+        for item in point_items:
+            item.draw(screen)
+        pygame.draw.rect(screen, (0, 255, 0), frog_rect, 2)
+        draw_score()
+
+        if game_over:
+            if score > best_score:
+                best_score = score
+            if pygame.time.get_ticks() - game_over_timer > 1000:
+                state = "game_over"
+
+    elif state == "game_over":
+        screen.blit(background, (0, 0))
+        over = font_big.render("Game Over", True, (255, 0, 0))
+        screen.blit(over, (WIDTH // 2 - over.get_width() // 2, 120))
+        last = font_small.render(f"Score : {score}", True, (255, 255, 255))
+        screen.blit(last, (WIDTH // 2 - last.get_width() // 2, 220))
+        best = font_small.render(f"Meilleur score : {best_score}", True, (255, 255, 0))
+        screen.blit(best, (WIDTH // 2 - best.get_width() // 2, 270))
+        rejouer_y = 350
+        if draw_button(screen, "Rejouer", WIDTH // 2 - 100, 350, 200, 60, (0, 200, 0), (0, 255, 0), font_small):
+            reset_game()
+            state = "jeu"
+            pygame.time.wait(200)  # anti double-clic
+        # Bouton Quitter juste en dessous
+        quitter_y = rejouer_y + 80
+        if draw_button(screen, "Quitter", WIDTH // 2 - 100, quitter_y, 200, 60, (200, 0, 0), (255, 0, 0), font_small):
+            pygame.quit()
+            sys.exit()
 
     pygame.display.flip()
