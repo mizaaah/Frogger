@@ -1,56 +1,69 @@
 import pygame
 import random
-import sys
+from config import *
+from os.path import join
 
-#DEF taille
-LARGEUR_FENETRE = 600
-HAUTEUR_FENETRE = 700
-TAILLE_GRENOUILLE = 40
-VERT = (0, 255, 0)
+images = {}
+collision_sound = None
+moteur_sound = None
+piece_sound = None
 
+# Fonction utilitaire pour charger une image et la redimensionner à la taille donnée
+def load_and_scale(path, size):
+    return pygame.transform.scale(pygame.image.load(path).convert_alpha(), size)
 
-# Initialiser Pygame
-pygame.init()
+# Charge toutes les images du jeu et les stocke dans le dictionnaire global 'images'
+def load_images():
+    global images
+    images = {
+        "bg": pygame.transform.scale(
+            pygame.transform.rotate(
+                pygame.image.load(join(IMG_PATH, "FondRoute.jpg")).convert(), 90),
+            (WIDTH, HEIGHT)),
+        "frog": load_and_scale(join(IMG_PATH, "Perso.png"), (FROG_SIZE, FROG_SIZE)),
+        "piece": load_and_scale(join(IMG_PATH, "piece.png"), (30, 30)),
+        "car_left_1": load_and_scale(join(IMG_PATH, "VoitureGDgauche.png"), CAR_SIZE),
+        "car_right_1": load_and_scale(join(IMG_PATH, "VoitureGDdroite.png"), CAR_SIZE),
+        "car_left_2": load_and_scale(join(IMG_PATH, "VoitureRDgauche.png"), CAR_SIZE),
+        "car_right_2": load_and_scale(join(IMG_PATH, "VoitureRDdroite.png"), CAR_SIZE),
+        "truck_left_1": load_and_scale(join(IMG_PATH, "CamionGGauche.png"), TRUCK_SIZE),
+        "truck_right_1": load_and_scale(join(IMG_PATH, "CamionGDdroite.png"), TRUCK_SIZE),
+        "truck_left_2": load_and_scale(join(IMG_PATH, "CamionRDgauche.png"), TRUCK_SIZE),
+        "truck_right_2": load_and_scale(join(IMG_PATH, "CamionRDdroite.png"), TRUCK_SIZE),
+    }
 
+# Charge tous les sons du jeu et les stocke dans des variables globales
+def load_sounds():
+    global collision_sound, moteur_sound, piece_sound
+    collision_sound = pygame.mixer.Sound(join(SND_PATH, "collision.flac"))
+    moteur_sound = pygame.mixer.Sound(join(SND_PATH, "moteur.wav"))
+    piece_sound = pygame.mixer.Sound(join(SND_PATH, "piece.ogg"))
+    pygame.mixer.music.load(join(SND_PATH, "musique_fond.mp3"))
 
-#class perso/Grenouille
-class Frog:
+# Classe représentant un objet "point" à collecter dans le jeu
+class PointItem:
+    # Initialise un nouvel objet avec sa taille basée sur l'image et le place aléatoirement
     def __init__(self):
-        self.reset()
-        self.player = pygame.Rect(100, 300, 50, 50)  # Position de base du joueur
+        self.width = images["piece"].get_width()
+        self.height = images["piece"].get_height()
+        self.respawn()
 
+    # Positionne aléatoirement l'objet dans la zone définie
+    def respawn(self):
+        self.x = random.randint(50, WIDTH - 50)
+        self.y = random.randint(120, 420)
+
+    # Met à jour la position verticale pour créer un effet de déplacement vers le haut
+    # et repositionne si l'objet sort de l'écran
     def update(self):
-        # Mise a jour de l'Etat du jeux
-        pass
-    
-    def reinitialiser(self):
-        self.x = LARGEUR_FENETRE // 2
-        self.y = HAUTEUR_FENETRE - TAILLE_GRENOUILLE - 10
-        self.taille = TAILLE_GRENOUILLE
-        self.vitesse = 5
+        self.y -= 0.5
+        if self.y + self.height < 0 or self.y > HEIGHT:
+            self.respawn()
 
-    def dessin(self, fenetre):
-        pygame.draw.rect(fenetre, VERT, (self.x, self.y, self.taille, self.taille))
+    # Dessine l'objet sur la surface donnée
+    def draw(self, window):
+        window.blit(images["piece"], (self.x, self.y))
 
-
-    def deplacer(self, keys):
-        if keys[pygame.K_LEFT] and self.x -self.vitesse > 0: #Bordure gauche
-            self.x -= self.vitesse # bouge gauche
-        if keys[pygame.K_RIGHT] and self.x + self.vitesse + self.taille < LARGEUR_FENETRE: #Bordure droite
-            self.x += self.vitesse # bouge droite
-        if keys[pygame.K_UP] and self.y - self.vitesse > 0:
-            self.x += self.vitesse # bouge haut
-        if keys[pygame.K_DOWN] and self.y + self.vitesse + self.taille < HAUTEUR_FENETRE:
-            self.x += self.vitesse # bouge bas
-
-
-
-
-    def draw_score(self, screen, score):
-        # Affiche le score en haut à gauche
-        font = pygame.font.SysFont(None, 36)
-        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
-        screen.blit(score_text, (10, 10))
-
-        
-        
+    # Renvoie le rectangle collision de l'objet pour détection des collisions
+    def get_rect(self):
+        return pygame.Rect(self.x, self.y, self.width, self.height)
