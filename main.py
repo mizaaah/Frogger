@@ -78,6 +78,23 @@ def reset_game():
     game_over = False
     game_over_timer = 0
 
+    #tentative de régler le problème de collision frontale (échouée)
+    # def reset_game():
+    # global frog_rect, scroll_offset, bg_y1, bg_y2, cars, point_items, score, game_over, game_over_timer
+    # frog_rect.centerx = WIDTH // 2
+    # frog_rect.bottom = HEIGHT - 10
+
+    # scroll_offset = 0
+    # bg_y1 = 0
+    # bg_y2 = -HEIGHT
+    # cars = []
+    # for _ in range(5):
+    #     cars.append(create_car(cars))
+    # point_items = [game.PointItem() for _ in range(5)]
+    # score = 0
+    # game_over = False
+    # game_over_timer = 0
+
 # Fonction pour dessiner un bouton interactif à l'écran
 def draw_button(surface, text, x, y, w, h, color, hover_color, font):
     mouse = pygame.mouse.get_pos()
