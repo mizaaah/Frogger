@@ -218,7 +218,7 @@ while True:
             item.draw(screen)
         draw_score()
 
-        # Affichage des hitboxes =================================================================================
+        # Affichage des hitbox
         pygame.draw.rect(screen, (0, 255, 0), frog_rect, 2)  # Hitbox grenouille en vert
         for car in cars:
             pygame.draw.rect(screen, (255, 0, 0), car["rect"], 2)  # Hitbox voitures en rouge
